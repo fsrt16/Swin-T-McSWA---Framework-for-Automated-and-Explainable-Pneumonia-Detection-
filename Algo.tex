@@ -1,0 +1,77 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\begin{document}
+
+\begin{algorithm}
+\caption{Overall Architecture Flow with T-block and Transformer Encoder}
+\begin{algorithmic}[1]
+
+\State \textbf{Input:} $X \in \mathbb{R}^{H \times W \times C}$
+\State $X \gets \text{Conv2D}_{3 \times 3}^{128}(X)$
+\State $X \gets \text{BatchNorm}(X)$
+\State $X \gets \text{ReLU}(X)$
+
+\State $X \gets \text{Conv2D}_{3 \times 3}^{256}(X)$
+\State $X \gets \text{BatchNorm}(X)$
+\State $X \gets \text{ReLU}(X)$
+
+\vspace{0.5em}
+\State \textbf{Patch Embedding:}
+\State $P \gets \text{Conv2D}_{3 \times 3,\; stride=2}^{512}(X)$
+\State $P \in \mathbb{R}^{h \times w \times d}$
+
+\vspace{0.5em}
+\State \textbf{T-block:}
+\State Let $f = \text{channels}(P)$
+
+\State $X_1 \gets \text{Conv2D}_{3 \times 3,\; dilation=2}^{f}(P)$
+\State $X_1 \gets \text{BN}(X_1)$
+\State $X_1 \gets \text{ReLU}(X_1)$
+
+\State $X_2 \gets \text{Conv2D}_{3 \times 3}^{f}(P)$
+\State $X_2 \gets \text{BN}(X_2)$
+\State $X_2 \gets \text{ReLU}(X_2)$
+
+\State $z \gets \text{GlobalAvgPool}(P)$ \Comment{$z \in \mathbb{R}^f$}
+\State $z \gets \text{Dense}_{f/8}(\text{ReLU}(z))$
+\State $z \gets \text{Dense}_{f}(\text{Sigmoid}(z))$
+\State $\hat{z} \gets \text{Reshape}(z)$ 
+\State {$\hat{z} \in   \mathbb{R}^{1 \times 1 \times f}$}
+
+\State $X_3 \gets P \odot \hat{z}$ 
+\Comment{Channel Attention}
+\State $P \gets \text{ReLU}(X_1 + X_2 + X_3)$
+
+\vspace{0.5em}
+\State \textbf{Transformer Encoding:}
+\State $S \gets \text{Reshape}(P)$ \Comment{$S \in \mathbb{R}^{(h \cdot w) \times d}$}
+\State $S \gets \text{AddPositionalEncoding}(S)$
+
+\For{$i = 1$ to $L$}
+    \State $Q,K,V \gets \text{Linear}(S)$
+    \State $A \gets \text{Softmax}\left( \frac{QK^T}{\sqrt{d_k}} \right)$
+    \State $S \gets \text{MultiHead}(A V)$
+    \State $S \gets \text{LayerNorm}(S)$
+    \State $S \gets \text{FFN}(S)$
+    \State $S \gets \text{LayerNorm}(S)$
+\EndFor
+
+\vspace{0.5em}
+\State \textbf{Classification Head:}
+\State $F \gets \text{GlobalAveragePooling1D}(S)$
+\State $F \gets \text{Dense}_{256}(\text{ReLU}(F))$
+\State $F \gets \text{Dropout}(F)$
+\State $\hat{y} \gets \text{Dense}_{N}(\text{Softmax}(F))$
+
+\State \textbf{Output:} $\hat{y} \in \mathbb{R}^{N}$
+
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}
