@@ -1,113 +1,93 @@
-# Swin-T-McSWA- -Framework-for-Automated-and-Explainable-Pneumonia-Detection-
-A Temporal Space-Driven Multi-Context Shifted Window Swin Transformer (Swin-T-McSWA) Framework for Automated and Explainable Pneumonia Detection in the Pulmonary Alveolar Region
 
 
-# Swin-T-McSWA: Shifted Window Transformer with Multi-context Swin Attention
+# 🧠 Swin-T-McSWA: Shifted Window Transformer with Multi-context Swin Attention
 
-![Architecture Diagram](Images/Picture2.png)
-> **Figure 1:** Swin-T-McSWA Model Architecture
+![Model Architecture](Images/Picture2.png)
+> **Figure 1:** Architecture of Swin-T-McSWA
 
 ---
 
-## 🧠 Overview
+## 🔍 Overview
 
-**Swin-T-McSWA** (Shifted Window Transformer with Multi-context Swin Attention) is a hybrid neural architecture that combines the hierarchical feature encoding capabilities of **DenseNet169**, with a novel **T-block** for convolutional attention, followed by **Swin Transformer-inspired window-based multi-head attention** for global context modeling.
+**Swin-T-McSWA** integrates a CNN backbone with a custom attention-based transformer decoder to build a high-performing, interpretable, and computationally efficient model for medical image classification — specifically designed for tasks like pneumonia detection from chest X-rays.
 
-This architecture is particularly effective for medical image classification and segmentation tasks, achieving **state-of-the-art (SOTA)** performance while maintaining a relatively small computational footprint.
-
----
-
-## 📊 Key Contributions
-
-- ✅ Integration of **DenseNet169** with a **custom T-block** for localized receptive field enhancement.
-- ✅ Use of **shifted window multi-head self-attention** inspired by Swin Transformers to learn hierarchical context.
-- ✅ Lightweight and fast inference design with only **37M parameters** and **7.2 GFLOPs**.
-- ✅ Interpretable decision-making via **XAI visualizations** and attention heatmaps.
+This hybrid network fuses:
+- **DenseNet169** for hierarchical feature extraction,
+- A novel **T-block** to introduce local and global context blending using channel-aware attention,
+- **Multi-head Swin Attention blocks** with window shifting for scalable and localized attention modeling,
+- Integrated **Explainable AI (XAI)** visualizations for clinical validation.
 
 ---
 
-## 🧪 Model Architecture Summary
+## 📷 Full Pipeline Workflow
 
-| Layer Type                   | Output Shape         | Param Count     |
-|-----------------------------|----------------------|-----------------|
-| DenseNet169 (frozen)        | (5, 5, 1664)         | 12.6M           |
-| T-block (dilated + conv + attention) | (5, 5, 1664)         | ~49.8M          |
-| Transformer (2× blocks)     | (25, 64)             | ~149K           |
-| Classifier Head             | (Dense layers)       | ~17K            |
-| **Total Parameters**        |                      | **63.4M**       |
-| **Trainable Parameters**    |                      | **50.8M**       |
-| **FLOPs**                   |                      | **7.2G**        |
+![Model Flow Pipeline](Images/Picture1.png)
+> **Figure 2:** Overall flow of Swin-T-McSWA pipeline including training, evaluation, and XAI generation.
 
 ---
 
-## 📈 Visual Workflow
+## 🧬 Input Example
 
-![Training Pipeline](Images/Picture1.png)
-> **Figure 2:** Workflow and data pipeline of the Swin-T-McSWA training and evaluation.
-
----
-
-## 🧪 Sample Input
-
-![Sample Input](Images/DevPneumonia-Page-2.drawio.png)
-> **Figure 3:** Example pneumonia X-ray data used in training and evaluation.
+![Sample Input X-ray Data](Images/DevPneumonia-Page-2.drawio.png)
+> **Figure 3:** Sample pneumonia X-ray image from the dataset used for training and evaluation.
 
 ---
 
-## 🔍 Explainable AI (XAI)
+## 🧠 Model Summary
 
-### 🔦 Attention Heatmap Visualization (I)
+- **Input Resolution:** 180 × 180 × 3
+- **Backbone:** DenseNet169 (frozen)
+- **T-block:** Custom convolutional and attention mechanism
+- **Transformer:** Two-stage Swin-style attention modules
+- **Final Classifier:** Dense + Dropout layers
 
+**Model Summary Diagram:**
+![Model Block Diagram](Images/Picture2.png)
+
+---
+
+## 🔦 Explainability via Attention Maps
+
+Swin-T-McSWA supports robust post-hoc visual explainability using attention-guided saliency maps:
+
+### XAI View 1:
 ![XAI Heatmap 1](Images/DevPneumonia-Page-3.drawio.png)
-> **Figure 4:** First-layer attention mapping for model explainability using Grad-CAM and Swin attention outputs.
+> **Figure 4:** Deep model attention map highlighting pneumonia-affected lung regions (Layer-wise GradCAM fusion).
 
-### 🔦 Attention Heatmap Visualization (II)
-
+### XAI View 2:
 ![XAI Heatmap 2](Images/Pneumonia.drawio.png)
-> **Figure 5:** Deep attention fusion patterns highlighting class-specific saliency.
+> **Figure 5:** Multi-head attention highlighting local-global decision salience.
 
 ---
 
-## 🔬 Ablation Study Results
+## 📊 Ablation Study
 
-| Configuration Comparison                                  | Params (M) | FLOPs (G) | Accuracy (%) | F1-Score (%) |
-|-----------------------------------------------------------|------------|-----------|--------------|--------------|
-| Hierarchical vs. Non-Hierarchical Attention               | 37         | 7.2       | 98.47        | 98.03        |
-| Shifted Window Attention vs. Standard Multi-head Self-Att | 37         | 7.2       | 98.46        | 98.01        |
-| Window Size (2×2 vs. 4×4 vs. 8×8)                         | 37         | 7.2       | 98.50        | 98.08        |
-| Self-Attention vs. Cross-Attention                        | 37         | 7.2       | 98.35        | 97.98        |
-| Positional Encoding: With vs. Without                     | 37         | 7.2       | 98.40        | 98.00        |
+### 🧪 Impact of Transformer Configurations
+
+| Ablation Type                                      | Params (M) | FLOPs (G) | Accuracy (%) | F1-Score (%) |
+|---------------------------------------------------|------------|-----------|--------------|--------------|
+| Hierarchical vs. Non-Hierarchical Attention       | 37         | 7.2       | 98.47        | 98.03        |
+| Shifted Window vs. Full Multi-head Attention      | 37         | 7.2       | 98.46        | 98.01        |
+| Window Size (2x2 vs. 4x4 vs. 8x8)                 | 37         | 7.2       | 98.50        | 98.08        |
+| Self vs. Cross Attention                          | 37         | 7.2       | 98.35        | 97.98        |
+| Positional Encoding: With vs. Without             | 37         | 7.2       | 98.40        | 98.00        |
 
 ---
 
-## 🚀 SOTA Comparison
+## 🏆 Performance Comparison with SOTA
 
 | Model                        | Accuracy (%) | F1-Score (%) | Parameters (M) | FLOPs (G) |
 |-----------------------------|--------------|--------------|----------------|-----------|
 | **Swin-T-McSWA (Proposed)** | **98.76**    | **98.17**    | 37             | 7.2       |
-| ViT-Large                   | 94.3         | 94.2         | 307            | 60+       |
+| CO-IRv2                     | 94.9         | 94.6         | -              | -         |
 | DenseNet201                 | 94.5         | 94.6         | -              | -         |
-| EfficientFormer-L1         | 94.3         | 94.4         | 12             | 1.3       |
+| ViT-Base                    | 94.2         | 94.1         | 86             | 17.6      |
+| ViT-Large                   | 94.3         | 94.2         | 307            | 60+       |
+| EfficientFormer-L1          | 94.3         | 94.4         | 12             | 1.3       |
 | MobileViT                   | 93.9         | 93.8         | 5.5            | 0.7       |
 | BEiT                        | 94.2         | 94.0         | 86             | 17.6      |
-| Vision Transformer (ViT)   | 97.61        | 95.00        | -              | -         |
+| Vision Transformer (ViT)    | 97.61        | 95.00        | -              | -         |
 
----
-
-## 📦 Repository Structure
-
-```bash
-├── Images/
-│   ├── Picture1.png               # Flow diagram
-│   ├── Picture2.png               # Model architecture
-│   ├── DevPneumonia-Page-2.drawio.png  # Sample input
-│   ├── DevPneumonia-Page-3.drawio.png  # XAI heatmap 1
-│   ├── Pneumonia.drawio.png           # XAI heatmap 2
-├── swin_t_mcswa_model.py         # Model implementation
-├── train.py                      # Training script
-├── inference.py                  # Inference/Prediction
-├── requirements.txt
-└── README.md                     # This file
 
 
 🔧 Setup and Usage
